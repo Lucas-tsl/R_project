@@ -1,6 +1,6 @@
 ---
 title: "NEXA Cours R: Mini Projet - Part-1a"
-author: "Votre Nom"
+author: "Troteseil Lucas"
 format: html
 editor: visual
 ---
@@ -33,7 +33,12 @@ library(here)
 Charger le fichier "nexa_telecom_user_info_2026.tsv" en utilisant la function 'read.table' avec les bons arguments. Créer un aperçu de la data.frame en utilisant la fonction 'head'
 
 ```{r}
-# votre code ici
+df_data <- readr::read_tsv(file=here::here("data/mini_projet/nexa_telecom_user_info_2026.tsv"), 
+                col_names = TRUE, 
+                skip = 0,
+                col_types = NULL)
+df_data
+head(df_data)
 ```
 
 Mettre en place le code R nécessaire pour répondre aux questions suivantes:
@@ -47,8 +52,13 @@ Mettre en place le code R nécessaire pour répondre aux questions suivantes:
 -   quelle est la "customer_value" par groupe d'age chez ces clients ?
 
 ```{r}
-# votre code ici
+str(df_data)
+length(unique(df_data$customer_id))
+mean(df_data$customer_value, na.rm = TRUE)
 
+df_data %>%
+  group_by(age_group) %>%
+  summarise(moyenne_valeur = mean(customer_value, na.rm = TRUE))
 ```
 
 ### Etape 3: chargement du fichier de l'activité des clients
@@ -56,17 +66,32 @@ Mettre en place le code R nécessaire pour répondre aux questions suivantes:
 Charger le fichier "nexa_telecom_user_activity_2026.tsv" en utilisant la function 'read.table' avec les bons arguments. Créer un aperçu de la data.frame en utilisant la fonction 'head'
 
 ```{r}
-# votre code ici
+df_activity <- readr::read_csv(file = here::here("data/mini_projet/nexa_telecom_user_activity_2026.csv"))
+
+head(df_activity)
 ```
 
 Identifier les modifications nécessaires à appliquer à ce jeu de données afin de permettre sa fusion avec la data.frame représentant le profile des clients. L'utilisation des fonctions 'dplyr::mutate' et 'tidyr::pivot_wider' peuvent vous être utiles.
 
 ```{r}
-# votre code ici
+
+df_activity_clean <- df_activity %>%
+  tidyr::pivot_wider(
+    names_from = activity, 
+    values_from = value,   
+    values_fill = 0       
+  ) %>%
+  dplyr::mutate(customer_id = paste0("Client", sprintf("%04d", user_id))) %>%
+  dplyr::select(-user_id)
+head(df_activity_clean)
 ```
 
 Effectuer la fusion de vos deux data.frames afin d'avoir une table unique où chaque client est representé par une seule ligne de données (voir la function 'dplyr::left_join'). Enfin, enregistrer une copie de ce fichier nettoyé au format TSV dans un répertoire 'data' de votre projet RStudio.
 
 ```{r}
-# votre code ici
+
+df_final <- dplyr::left_join(df_data, df_activity_clean, by = "customer_id")
+head(df_final)
+readr::write_tsv(df_final, file = here::here("data/mini_projet/nexa_telecom_final_2026.tsv"))
+
 ```
