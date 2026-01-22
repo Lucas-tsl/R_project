@@ -1,0 +1,128 @@
+---
+title: "Nexa Cours R: Génération de données synthétiques"
+format: 
+  html:
+    toc: true
+    toc-location: left
+    toc_float: true
+    code-overflow: scroll
+    embed-resources: true
+editor: visual
+---
+
+### Cours R: génération de données synthétique pour l'analyse de données
+
+Ce rapport contient une liste d'examples en R de génération de données synthétiques. Les données synthétiques sont très utiles pour tester et évaluer des methodes d'analyse de données. R est un language qui permet de facilement créer une grande diversité de données.
+
+## Chargement des librairies
+
+```{r}
+# library(tidyverse)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+#(MASS)
+```
+
+## Génération d'échantillons aléatoires
+
+```{r}
+# A partir d'une liste d'éléments définis
+sample(x = c("A", "B", "C"), size = 10, replace = TRUE, prob = c(0.6, 0.2, 0.2))
+# modifier les paramètres pour explorer leurs roles
+# votre code ici
+```
+
+```{r}
+set.seed(123)
+# A partir de distributions connues
+rnorm(n = 5, mean = 2, sd = 3) # gaussienne
+runif(n = 3, min = 10, max = 20) # uniforme
+rbinom(n = 5, size = 10, prob = 0.5) #binomiale
+
+# voir ?Distributions pour explorer toutes les autres distributions disponibles
+# votre code ici
+```
+
+## Construire une data.frame pour représenter une cohorte
+
+```{r}
+set.seed(42)
+nb_patients <- 100
+
+df_data <- tibble(
+  subject_id = paste0("SUBJ", stringr::str_pad(1:nb_patients, width = 4, side = "left", pad = "0")),
+  age = round(runif(n = nb_patients, 
+              min = 20, max = 59),
+              digits = 1),
+  sex = sample(x = c('Female', 'Male'), 
+               size = nb_patients, 
+               replace = TRUE, 
+               prob = c(0.6, 0.4)),
+  status = sample(x = c('Healthy', 'Infected', 'Recovered'), 
+               size = nb_patients, 
+               replace = TRUE, 
+               prob = c(0.2, 0.3, 0.5))
+)
+df_data
+```
+
+## Construire une représentation graphique de la cohorte
+
+```{r}
+
+p <- ggplot(data=df_data, aes(x=status, y=age)) +
+  geom_boxplot() +
+  geom_jitter(width = 0.1) +
+  ggtitle("my first plot")
+p
+```
+
+## Créer des mesures non-correlées
+
+```{r}
+set.seed(42)
+nb_patients <- 100
+
+df_data <- tibble(
+  subject_id = paste0("SUBJ", stringr::str_pad(1:nb_patients, width = 4, side = "left", pad = "0")),
+  bmi = round(rnorm(n = nb_patients, mean = 25, sd = 4), digits = 1),
+  bp_systolic = floor(rnorm(n = nb_patients, mean = 85, sd = 10)),
+  bp_diastolic = floor(rnorm(n = nb_patients, mean = 125, sd = 13)),
+)
+df_data
+```
+
+## Créer des mesures qui dependent d'une variable catégorique
+
+```{r}
+set.seed(42)
+nb_patients <- 100
+
+df_data <- tibble(
+  subject_id = paste0("SUBJ", stringr::str_pad(1:nb_patients, width = 4, side = "left", pad = "0")),
+  treatment_group = sample(c("Control", "Treatment_A", "Treatment_B"), 
+                           size = nb_patients, 
+                           replace = TRUE, 
+                           prob = c(0.3, 0.3, 0.4)),
+  measurement_1 = rnorm(n = nb_patients, 
+                        mean = case_when(
+                                        treatment_group == "Control" ~ 30,
+                                        treatment_group == "Treatment_A" ~ 70,
+                                        treatment_group == "Treatment_B" ~ 55), 
+                        sd = 10)
+)
+
+df_data
+
+
+```
+
+```{r}
+
+p <- ggplot(data=df_data, aes(x=treatment_group, y=measurement_1)) +
+  geom_boxplot() +
+  ggtitle("my 2nd plot")
+p
+```

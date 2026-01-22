@@ -1,0 +1,117 @@
+---
+title: "NEXA Cours R: Mini Projet - Part-1b"
+author: "Votre Nom"
+format: html
+editor: visual
+---
+
+##### [**Date**]{.underline}: **22 Janvier 2026**
+
+## NEXA Cours R Data: mini-projet - partie 1b
+
+Ce document R Quarto va vous guider dans l'exploration d'un jeu de données lié à l'industrie des Télécoms avec le langage de programmation R et de ses librairies.
+
+### Etape 1: chargement des librairies R
+
+Identifier et charger les libraries R qui vont vous être utile à lire et explorer les fichiers de données.
+
+```{r}
+library(tidyverse)
+library(ggcorrplot)
+library(here)
+```
+
+### Etape 2: chargement du jeu de données nettoyé
+
+Charger le fichier que vous avez sauvegardé en fin de la partie 1a.
+
+```{r}
+# votre code ici
+
+```
+
+### Etape 3: visualisation des données avec ggplot2
+
+Cette partie va être dédiée à la visualisation de données avec la librarie ggplot2.
+
+#### Construire des histogrammes pour 3 variables numériques
+
+Ajouter en superposition la densité de la distribution (voir la fonction geom_density()) N'oubliez pas de commenter chaque graphique avec vos observations.
+
+```{r}
+# votre code ici: histogramme 1
+```
+
+vos commentaires: ...
+
+```{r}
+# votre code ici: histogramme 2
+```
+
+vos commentaires: ...
+
+```{r}
+# votre code ici: histogramme 3
+```
+
+vos commentaires: ...
+
+#### Construire un boxplot
+
+Sélectionner 3 combinaisons de variables numériques et de variables catégoriques, afin de construire 3 boxplots différents. Vous pouvez utiliser le paramètre de couleurs pour visualiser une variable catégorique supplémentaire.
+
+N'oubliez pas de commenter chaque graphique avec vos observations.
+
+```{r}
+# votre code ici: boxplot 1
+```
+
+vos commentaires: ...
+
+```{r}
+# votre code ici: boxplot 2
+```
+
+vos commentaires: ...
+
+```{r}
+# votre code ici: boxplot 3
+```
+
+vos commentaires: ...
+
+#### Construire un scatterplot
+
+Sélectionner 3 paires de variables numériques pour construire 3 scatterplots différents. Illustrer aussi comment les paramètres de couleur et de taille peuvent être utilisés. N'oubliez pas de commenter chaque graphique avec vos observations.
+
+```{r}
+# votre code ici: scatterplot 1
+```
+
+vos commentaires: ...
+
+```{r}
+# votre code ici: scatterplot 2
+```
+
+vos commentaires: ...
+
+```{r}
+# votre code ici: scatterplot 3
+```
+
+vos commentaires: ...
+
+#### Construire une matrice de corrélation et sa réprésentation graphique.
+
+Utilisation de la fonction 'cor()' sur les variables numériques, et de la fonction ggcorplot() pour sa représentation.
+
+Sélectionner les paramètres de 'ggcorplot' pour ne representer les corrélations que dans la partie basse de la matrice, sans la diagonale. Ajouter le coéfficient de corrélation pour chaque cellule. Indiquer un titre explicite à votre visualisation.
+
+N'oubliez pas de commenter chaque graphique avec vos observations.
+
+```{r}
+# votre code ici
+```
+
+vos commentaires: ...

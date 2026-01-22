@@ -1,0 +1,72 @@
+---
+title: "NEXA Cours R: Mini Projet - Part-1a"
+author: "Votre Nom"
+format: html
+editor: visual
+---
+
+##### [**Date**]{.underline}: **22 Janvier 2026**
+
+## NEXA Cours R Data: mini-projet - partie 1a
+
+Ce document R Quarto va vous guider dans l'exploration d'un jeu de données lié à l'industrie des Télécoms avec le langage de programmation R et de ses librairies.
+
+Deux fichiers vous sont fournis dans ce [répertoire en ligne](https://kdrive.infomaniak.com/app/share/1595591/2a56e464-d797-4370-8322-d36a80db395c). Ils décrivent le profile, et l'activité de clients d'un opérateur de télécoms.
+
+**Fichier 1**: nexa_telecom_user_info_2026.tsv
+
+**Fichier 2**: nexa_telecom_user_activity_2026.csv
+
+Télécharger ces fichiers sur votre ordinateur, et créer un projet RStudio pour pouvoir les explorer.
+
+### Etape 1: chargement des librairies R
+
+Identifier et charger les libraries R qui vont vous être utile à lire et explorer les fichiers de données.
+
+```{r}
+library(tidyverse)
+library(here)
+```
+
+### Etape 2: chargement du profile des clients
+
+Charger le fichier "nexa_telecom_user_info_2026.tsv" en utilisant la function 'read.table' avec les bons arguments. Créer un aperçu de la data.frame en utilisant la fonction 'head'
+
+```{r}
+# votre code ici
+```
+
+Mettre en place le code R nécessaire pour répondre aux questions suivantes:
+
+-   quelles sont les variables numériques et les variables catégoriques ?
+
+-   combien de clients uniques sont décrit dans le fichier ?
+
+-   quelle est la "customer_value" moyenne sur l'ensemble des clients ?
+
+-   quelle est la "customer_value" par groupe d'age chez ces clients ?
+
+```{r}
+# votre code ici
+
+```
+
+### Etape 3: chargement du fichier de l'activité des clients
+
+Charger le fichier "nexa_telecom_user_activity_2026.tsv" en utilisant la function 'read.table' avec les bons arguments. Créer un aperçu de la data.frame en utilisant la fonction 'head'
+
+```{r}
+# votre code ici
+```
+
+Identifier les modifications nécessaires à appliquer à ce jeu de données afin de permettre sa fusion avec la data.frame représentant le profile des clients. L'utilisation des fonctions 'dplyr::mutate' et 'tidyr::pivot_wider' peuvent vous être utiles.
+
+```{r}
+# votre code ici
+```
+
+Effectuer la fusion de vos deux data.frames afin d'avoir une table unique où chaque client est representé par une seule ligne de données (voir la function 'dplyr::left_join'). Enfin, enregistrer une copie de ce fichier nettoyé au format TSV dans un répertoire 'data' de votre projet RStudio.
+
+```{r}
+# votre code ici
+```

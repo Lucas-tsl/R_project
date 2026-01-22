@@ -1,0 +1,175 @@
+---
+title: "Ggplot2 Principles"
+author: "NEXA Cours R 2026"
+format: 
+  html:
+    toc: true
+    toc-location: left
+    toc_float: true
+    code-overflow: scroll
+    embed-resources: true
+    other-links:
+      - text: ggplot2 cheat sheet
+        href: https://posit.co/wp-content/uploads/2022/10/data-visualization-1.pdf
+editor: visual
+---
+
+# Ggplot2 Principles
+
+The `ggplot2` library in R is built on the principles of the "Grammar of Graphics," a framework that defines a structured approach to creating visualizations. Developed by Leland Wilkinson and implemented by Hadley Wickham, the grammar breaks down complex plots into basic, layered components. In this section, we will explore how a ggplot2 plot is built layer-by-layer.
+
+### Load required R libraries
+
+```{r}
+library(ggplot2)
+library(tibble)
+```
+
+### Build a synthetic dataset
+
+To illustrate the different capabilities of the ggplot2 library we will use a synthetic dataset.
+
+```{r}
+set.seed(123)  # For reproducibility
+
+# Number of patients
+nb_patients <- 200
+
+# Generate synthetic data
+synthetic_data <- tibble(
+  subject_id = paste0("Patient_", 1:nb_patients),
+  age = rnorm(nb_patients, mean = 50, sd = 15),
+  sex = sample(c("male", "female"), 
+               size = nb_patients, 
+               prob = c(0.7, 0.3), replace = TRUE),
+  treatment = sample(c("Placebo", "Drug A", "Drug B"), 
+                     nb_patients, replace = TRUE),
+  biomarker_A = rnorm(nb_patients, mean = 5, sd = 1.5),
+  # biomarker_B Correlated with biomarker_A
+  biomarker_B = biomarker_A * 0.8 + rnorm(nb_patients, mean = 2, sd = 1), 
+  outcome = 50 + 0.5 * age + 
+    ifelse(treatment == "Drug A", 10, 
+           ifelse(treatment == "Drug B", 15, 0)) +
+            rnorm(nb_patients, mean = 0, sd = 5))
+
+# Display first few rows of the dataset
+head(synthetic_data)
+```
+
+## Introduction
+
+In `ggplot2`, every plot is constructed using a consistent set of elements: data, aesthetic mappings (like `x`, `y`, color), and geometric objects (such as points, lines, or bars). Layers can then be added to control scales, facets, and statistical transformations, allowing for powerful customization and clarity in displaying data relationships. The grammar-based structure of `ggplot2` enables flexibility in combining these elements, making it easy to build clear, complex plots in a standardized, reproducible way. `ggplot2` emphasizes "tidy" data, where each variable is a column and each observation is a row, allowing seamless integration with the broader Tidyverse toolkit.
+
+![](images/ggplot2_layers.jpg)
+
+## Building plots layer-by-layer
+
+In this section, we will explore the **layer-by-layer approach** that forms the foundation of plot creation in ggplot2. This approach allows you to build complex visualizations step by step by stacking layers, each adding a specific element to the plot. Starting with the data and aesthetic mappings, we will progressively introduce geometric objects, statistical transformations, coordinate adjustments, facets, and themes. By the end, you will understand how each layer contributes to a plot and how their combination offers unparalleled flexibility to create clear, tailored, and impactful visualizations.
+
+### Data layer \[required\]
+
+The specification of a data.frame is required to initialize the ggplot2 object through a call to the ggplot2::ggplot() function.
+
+```{r}
+# required specification of a data.frame to initialize a ggplot2 plot
+ggplot2::ggplot(data = synthetic_data)
+```
+
+**Note**: with only the data.frame, the ggplot2 plot is an empty plot for now, the aesthetics and geometric layers will be required to properly defined a first visualization.
+
+### Aesthetics mapping layer \[required\]
+
+Following the specification of the data, it is now required to define how we want to map the columns of the data.frame with the aesthetics of the future plot.
+
+```{r}
+# we specify the use of 2 columns to define the x-axis and y-axis of our plot
+ggplot(data = synthetic_data, aes(x = biomarker_A, y = biomarker_B))
+```
+
+**Note**: the plot is still empty, but thanks to the definition of the x and y axis, the ranges are defined.
+
+### Geometric layer \[required\]
+
+The geometric layer in ggplot2 defines the type of plot to display by specifying the geometric objects (geoms) used to represent the data. Common geoms include `geom_point()` for scatter plots, `geom_line()` for line plots, and `geom_bar()` for bar charts. Each geom layer maps your data to shapes, lines, or other visual elements, forming the core of your plot. By combining multiple geoms in a single visualization, you can highlight different aspects of your data and build rich, layered plots tailored to your analytical needs.
+
+Notice how we use the **'+'** symbol to compose the geometric layer with the data/aesthetics layer.
+
+```{r}
+# let's define the geomtric layer as points
+ggplot(data = synthetic_data, aes(x = biomarker_A, y = biomarker_B)) +
+  geom_point()
+```
+
+```{r}
+# We add an aesthetic parameter with the definition of color mapped to the Sex variable
+ggplot(data = synthetic_data, aes(x = biomarker_A, y = biomarker_B, color = sex)) +
+  geom_point()
+```
+
+```{r}
+# We add another aesthetic parameter with the size of the points mapped to the Age variable.
+ggplot(data = synthetic_data, aes(x = biomarker_A, y = biomarker_B, color = sex, size = age)) +
+  geom_point()
+```
+
+### Facet layer \[optional\]
+
+Facets in ggplot2 allow you to split a dataset into subsets and create individual plots for each subset within a single visualization. This is done using the `facet_wrap` or `facet_grid` functions, which create small multiples based on one or more categorical variables. Facets are particularly useful for comparing trends, patterns, or relationships across groups.
+
+```{r}
+ggplot(data = synthetic_data, aes(x = biomarker_A, y = biomarker_B, color = sex)) +
+  geom_point() +
+  facet_wrap(~ treatment)
+```
+
+### Statistics layer \[optional\]
+
+The statistics layer in ggplot2 is used to compute and display derived data, such as summaries, transformations, or model fits, directly within a plot. This layer enhances visualizations by adding elements like trend lines, confidence intervals, or density estimates. For example, `geom_smooth()` can overlay a regression line on a scatter plot, while `stat_summary()` can calculate and display means or medians for grouped data. The statistics layer allows you to combine raw data with analytical insights, making your plots more informative and actionable.
+
+```{r}
+# WE add a regression line to our plots
+ggplot(data = synthetic_data, aes(x = biomarker_A, y = biomarker_B, color = sex)) +
+  geom_point() +
+  facet_wrap(~ treatment) +
+  geom_smooth(method = "loess", se = TRUE)
+```
+
+### Coordinate layer \[optional\]
+
+The coordinate layer in ggplot2 controls how data is mapped to the plot's coordinate system, affecting the scale, aspect ratio, and layout of the visualization. It allows you to customize the view by using functions like `coord_cartesian()` for zooming in on specific data ranges, `coord_flip()` to swap the x- and y-axes, or `coord_polar()` for creating circular plots like pie charts. By modifying the coordinate layer, you can adjust the perspective of your plot to emphasize specific aspects of your data, improving clarity and interpretability.
+
+```{r}
+ggplot(data = synthetic_data, aes(x = biomarker_A, y = biomarker_B, color = treatment)) +
+  geom_point() +
+  facet_wrap(~ treatment) +
+  geom_smooth(method = "lm", se = FALSE) +
+  # using a log10 scale for our X-axis
+  scale_x_log10("Biomarker_A Log Scale") +
+  # specifying the range of our Y axis to be displayed
+  scale_y_continuous("Biomarker B", limits = c(0, 15)) +
+  # specify the colors to be used
+  scale_color_manual(values = c("Drug B"= "green","Drug A" = "red", "Placebo" = "blue"))
+```
+
+### Theme layer \[optional\]
+
+The theme layer in **ggplot2** controls the non-data elements of a plot, such as axis labels, titles, legends, grid lines, and overall aesthetics. It allows you to customize the appearance of your plot to suit your needs, whether for publication, presentation, or exploratory analysis. Predefined themes like `theme_minimal()` or `theme_classic()` offer quick stylistic changes, while the `theme()` function provides fine-grained control over individual elements. By adjusting the theme layer, you can enhance the readability and visual appeal of your plots, ensuring they effectively communicate your data.
+
+```{r}
+ggplot(data = synthetic_data, aes(x = biomarker_A, y = biomarker_B, color = sex)) +
+  geom_point() +
+  facet_wrap(~ treatment) +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_x_log10("Biomarker_A Log Scale") +
+  scale_y_continuous("Biomarker B", limits = c(0, 15)) +
+  scale_color_manual(values = c("red", "blue")) +
+  # let's use the predefined black-and-white theme
+  # see also the predefined theme_minimal()
+  theme_bw() +
+  # add a title to our plot
+  labs(title = "Plot of our synthetic data") 
+```
+
+### **Conclusion: The Power of ggplot2 Layers**
+
+The layered structure of ggplot2 is the foundation of its flexibility and power. Each layer—data, aesthetics, geoms, statistics, coordinates, facets, and themes—contributes a specific role in building a visualization. By composing these layers, you can create plots that are both highly customized and easy to interpret. This modular approach enables you to adapt your visualizations to different datasets, analysis needs, and presentation contexts, making ggplot2 an indispensable tool for data storytelling and scientific communication.

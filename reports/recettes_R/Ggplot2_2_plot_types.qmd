@@ -1,0 +1,264 @@
+---
+title: "Ggplot2 Plot Types"
+author: "NEXA Cours R 2026"
+format: 
+  html:
+    toc: true
+    toc-location: left
+    toc_float: true
+    code-overflow: scroll
+    embed-resources: true
+    other-links:
+      - text: ggplot2 cheat sheet
+        href: https://posit.co/wp-content/uploads/2022/10/data-visualization-1.pdf
+editor: visual
+---
+
+# Ggplot2 Plot Types
+
+In this section, we will explore the diverse range of plot types available in ggplot2, each suited for visualizing different types of data and answering specific analytical questions. From scatter plots for relationships to bar plots for comparisons, line plots for trends, and boxplots for distributions, ggplot2 offers a powerful toolkit for representing your data effectively. We’ll demonstrate how to choose the right plot type based on your data and objectives, helping you unlock the full potential of your visualizations.
+
+## Set-up
+
+### Load required R libraries
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(tibble)
+```
+
+### Build a synthetic dataset
+
+Let's start by generating a synthetic dataset that we will use to illustrate the different plot types available in ggplot2.
+
+```{r}
+set.seed(123)  # For reproducibility
+
+# Number of patients
+nb_patients <- 200
+
+# Generate synthetic data
+synthetic_data <- tibble(
+  subject_id = paste0("Patient_", 1:nb_patients),
+  age = rnorm(nb_patients, mean = 50, sd = 15),
+  sex = sample(c("male", "female"), 
+               size = nb_patients, 
+               prob = c(0.7, 0.3), replace = TRUE),
+  treatment = sample(c("Placebo", "Drug A", "Drug B"), 
+                     nb_patients, replace = TRUE),
+  biomarker_A = rnorm(nb_patients, mean = 5, sd = 1.5),
+  # biomarker_B Correlated with biomarker_A
+  biomarker_B = biomarker_A * 0.8 + rnorm(nb_patients, mean = 2, sd = 1), 
+  outcome = 50 + 0.5 * age + 
+    ifelse(treatment == "Drug A", 10, 
+           ifelse(treatment == "Drug B", 15, 0)) +
+            rnorm(nb_patients, mean = 0, sd = 5))
+
+# Display first few rows of the dataset
+head(synthetic_data)
+```
+
+## Introduction
+
+`ggplot2` supports a wide variety of plot types, enabling flexible, insightful visualizations. **Histograms** (`geom_histogram()`) and **density plots** (`geom_density()`) reveal the distribution of continuous variables, and **bar plots** (`geom_bar()`) summarize categorical data frequencies. **Boxplots** (`geom_boxplot()`) and **violin plots** (`geom_violin()`) are used for comparing distributions across categories, showing medians, ranges, and densities. **Scatter plots** (`geom_point()`) highlight relationships between two continuous variables.
+
+For exploring interactions, **facet grids** (`facet_grid()` or `facet_wrap()`) allow multi-panel visualizations based on one or more categorical variables. **Heatmaps** (`geom_tile()`) and **bubble charts** (using `geom_point()` with size aesthetics) are useful for multi-variable representations. `ggplot2`’s layered grammar approach also enables customization and combination of these plot types to create highly tailored, information-rich graphics.
+
+![](images/ggplot2_PlotTypes.png){fig-align="right"}
+
+### Single Variable Visualizations
+
+Let's have a look at the options available when we want to display a single variable (continuous or categorical)
+
+#### Histogram (Continuous Variable)
+
+The Histogram plot is used to display the distribution of a continuous variable, highlighting its shape, spread, and any potential outliers.
+
+**Note**: It is important to choose the right 'binwidth' parameter that fits your data.
+
+```{r}
+#| echo: false
+ggplot(data=synthetic_data, aes(x = age)) +
+  # histogram plot with the specification of border and fill colors
+  geom_histogram(binwidth = 5, fill = "skyblue", color = "red") +
+  labs(title = "Distribution of Age", x = "Age", y = "Frequency") 
+```
+
+#### Bar plot (categorical Variable)
+
+The Bar plot is ideal for showing counts or frequencies of categories. It is useful to identify the most common categories.
+
+```{r}
+ggplot(synthetic_data |> dplyr::arrange(treatment), 
+       aes(x = treatment)) +
+  geom_bar(fill = "darkgreen") +
+  labs(title = "Treatment Distribution", x = "Treatment", y = "Count") +
+  theme_bw()
+
+```
+
+### Two-Variable Visualizations
+
+#### Scatter plot (Continuous vs Continuous)
+
+This Scatter plot is great to explore relationships between two continuous variables, such as correlations, non-linear patterns, or clusterings.
+
+```{r}
+ggplot(synthetic_data, aes(x = biomarker_A, y = biomarker_B)) +
+  geom_point(color = "blue", 
+             # define the size of the shape
+             size = 2, 
+             # define the shape to use. Shapes 21 to 25 can define both fill and color aesthetics
+             shape = 23, 
+             fill="lightblue") +
+  labs(title = "Relationship Between Biomarker_A and Biomarker_B", 
+       x = "Biomarker A", 
+       y = "Biomarker B") +
+  theme_bw()
+
+```
+
+#### Boxplot (Continuous vs Categorical)
+
+This Boxplot helps to compare distributions of a continuous variable across different categories, showing medians, quartiles, and potential outliers.
+
+```{r}
+ggplot(synthetic_data, aes(x = treatment, y = outcome, alpha = 0.5)) +
+  geom_boxplot(aes(fill = treatment), 
+               # specify color for outliers
+               outlier.colour = "red", 
+               # specify shape for outliers
+               outlier.shape = 8) +
+  geom_jitter(aes(fill = sex), shape = 21) +
+  labs(title = "Outcome by Treatments", x = "Treatments", y = "Outcome") +
+  theme_bw()
+
+```
+
+#### Bar plot with groups (Categorical vs Categorical)
+
+This is an effective visualization to explore the relationships between two categorical variables. Stacked or side-by-side bar plots are common choices.
+
+```{r}
+ggplot(synthetic_data, aes(x = treatment, fill = sex)) +
+  # set dodged bars, see also 'stack' bars
+  geom_bar(position = "dodge") +
+  # specify the different titles
+  labs(title = "Treatments by Sex", 
+       x = "Patient's Sex", 
+       y = "Number of Patients", 
+       # set legend title
+       fill = "Patient Sex") +
+  theme_bw()
+
+```
+
+### Three-Variable Visualizations
+
+Let's explore the options available in ggplot2 to display 3 different variables in the same plot.
+
+#### Scatter Plot with Color or Size (Continuous vs Continuous with Categorical)
+
+This plot extends the basic scatter plot by adding a third variable as color or size. Useful for detecting patterns or clustering within groups.
+
+```{r}
+ggplot(synthetic_data, aes(x = biomarker_A, y = biomarker_B, color = factor(treatment))) +
+  geom_point(size = 3) +
+  labs(title = "Biomarker_A vs Biomarker_B by Treatments", 
+       x = "Biomarker_A", 
+       y = "Biomarker_B", 
+       color = "Treatments") +
+  theme_bw()
+
+```
+
+#### Box plot with Fill (Continuous vs Categorical, with Categorical Fill)
+
+This plot shows how a continuous variable varies across two categorical variables. Useful for comparing subgroups.
+
+```{r}
+ggplot(synthetic_data, aes(x = treatment, y = biomarker_B, fill = sex)) +
+  geom_boxplot() +
+  labs(title = "Biomarker_B by treatment and sex", 
+       x = "Treatment", 
+       y = "Biomarker_B", 
+       fill = "Sex") +
+  theme_bw()
+
+```
+
+#### Heatmap (Categorical vs Categorical, with Continuous Intensity)
+
+By mapping values to colors, heatmaps provide a clear and compact way to represent high-dimensional data, such as gene expression profiles, or correlation matrices. They are particularly valuable for identifying clusters, trends, or anomalies across samples and variables.
+
+**Note**: A long format of the data is required
+
+```{r}
+# compute patient counts per treatment and sex 
+synthetic_data_counts <- synthetic_data |> count(treatment, sex)
+
+# display counts as heatmap
+ggplot(data = synthetic_data_counts, 
+       # map counts to color
+       aes(x = treatment, y = sex, fill = n)) +
+  # define heatmap geometric layer
+  geom_tile() +
+  # define gradient color
+  scale_fill_gradient(low = "lightgreen", high = "darkred") +
+  labs(title = "Heatmap of Patient Counts by Treatment and Sex", x = "Treatment", y = "Sex") +
+  theme_minimal()
+
+```
+
+#### Violin points with points (Continuous vs Categorical with Points)
+
+Violin plots in ggplot2 are a powerful tool for visualizing the distribution of a continuous variable across different categories. Combining features of boxplots and density plots, violin plots show the full distribution's shape. Violin plots provide a detailed and elegant way to identify patterns, differences, and outliers in your data.
+
+```{r}
+ggplot(synthetic_data, aes(x = treatment, y = outcome, fill = sex)) +
+  geom_violin() +
+  # overlay jitter points with transparency (alpha channel)
+  geom_jitter(size = 1, color = "black", alpha = 0.3, 
+              position = position_jitterdodge(jitter.width = 0.1, dodge.width = 0.9)) +
+  labs(title = "Violin plot on our synthetic data", x = "Treatment", y = "Outcome", fill = "Sex") +
+  theme_bw()
+
+```
+
+### Plot Faceting
+
+Faceting in `ggplot2` is a feature that splits data into subsets and displays each in its own panel within a single plot. It helps visualize patterns across groups by organizing data in a grid layout.
+
+There are two main faceting functions:
+
+-   **`facet_wrap()`**: Arranges panels in a grid by wrapping them into rows and columns, perfect for visualizing a single categorical variable.
+
+    ```{r}
+    ggplot(synthetic_data, aes(x = biomarker_A, y = biomarker_B, color = factor(treatment))) +
+      geom_point(size = 3) +
+      labs(title = "Biomarker_A vs Biomarker_B by Treatments", 
+           x = "Biomarker_A", 
+           y = "Biomarker_B", 
+           color = "Treatments") +
+      facet_wrap(~treatment, nrow = 1, scales = "fixed") +
+      theme_bw()
+    ```
+
+-   **`facet_grid()`**: Creates a matrix layout where rows and columns correspond to two categorical variables, ideal for structured comparisons.
+
+    ```{r}
+    ggplot(synthetic_data, aes(x = biomarker_A, y = biomarker_B, color = factor(treatment))) +
+      geom_point(size = 3) +
+      labs(title = "Biomarker_A vs Biomarker_B by Treatments and Sex", 
+       x = "Biomarker_A", 
+       y = "Biomarker_B", 
+       color = "Treatments") +
+      facet_grid(sex~treatment, scales = "fixed") +
+      theme_bw()
+    ```
+
+Faceting is highly customizable. Facets adapt dynamically to the number of groups, making them suitable for datasets with diverse categories. They work seamlessly with themes and styling, ensuring readability. A long format of the data is required.
+
+Use faceting to compare trends, distributions, or interactions in complex datasets without cluttering a single plot. For example, create panels for cytokine levels across different stimuli to explore group-level differences. Faceting helps uncover hidden insights and communicate data effectively.
