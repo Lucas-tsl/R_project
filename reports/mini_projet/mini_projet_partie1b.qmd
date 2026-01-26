@@ -1,6 +1,6 @@
 ---
 title: "NEXA Cours R: Mini Projet - Part-1b"
-author: "Votre Nom"
+author: "Troteseil Lucas"
 format: html
 editor: visual
 ---
@@ -26,8 +26,12 @@ library(here)
 Charger le fichier que vous avez sauvegardé en fin de la partie 1a.
 
 ```{r}
-# votre code ici
-
+df_data <- readr::read_tsv(file=here::here("data/mini_projet/nexa_telecom_final_2026.tsv"), 
+                col_names = TRUE, 
+                skip = 0,
+                col_types = NULL)
+df_data
+head(df_data)
 ```
 
 ### Etape 3: visualisation des données avec ggplot2
@@ -39,22 +43,43 @@ Cette partie va être dédiée à la visualisation de données avec la librarie 
 Ajouter en superposition la densité de la distribution (voir la fonction geom_density()) N'oubliez pas de commenter chaque graphique avec vos observations.
 
 ```{r}
-# votre code ici: histogramme 1
+ggplot(df_data, aes(x = customer_value)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30, fill = "lightblue", color = "white") +
+  geom_density(color = "red", linewidth = 1) +
+  labs(title = "Distribution de la Customer Value", x = "Valeur Client", y = "Densité") +
+  theme_minimal()
 ```
 
-vos commentaires: ...
+vos commentaires:
+
+La distribution est asymétrique a plupart des clients ont une valeur faible ou moyenne, mais quelques gros clients, très rentables, font augmenter la moyenne.
 
 ```{r}
-# votre code ici: histogramme 2
+# Histogramme de la durée des appels
+ggplot(df_data, aes(x = nb_call_seconds)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 30, fill = "lightgreen", color = "white") +
+  geom_density(color = "darkgreen", linewidth = 1) +
+  labs(title = "Distribution de la durée des appels", x = "Durée (secondes)", y = "Densité") +
+  theme_minimal()
 ```
 
-vos commentaires: ...
+vos commentaires:
+
+Ce graphique montre l’usage de la voix. Une courbe en cloche indique un usage normal, tandis que plusieurs pics peuvent révéler différents profils d’utilisateurs (peu d’appels vs beaucoup d’appels).
 
 ```{r}
-# votre code ici: histogramme 3
+ggplot(df_data, aes(x = age)) +
+  geom_histogram(aes(y = after_stat(density)), bins = 20, fill = "orange", color = "white") +
+  geom_density(color = "brown", linewidth = 1) +
+  labs(title = "Distribution de l'âge des clients", x = "Age", y = "Densité") +
+  theme_minimal()
 ```
 
-vos commentaires: ...
+vos commentaires:
+
+La distribution de l'âge semble montrer des pics spécifiques.
+
+La base clients est donc majoritairement Adulte. On observe aussi des groupe d'age qui est cohérent avec la réalitée des données
 
 #### Construire un boxplot
 
@@ -63,44 +88,81 @@ Sélectionner 3 combinaisons de variables numériques et de variables catégoriq
 N'oubliez pas de commenter chaque graphique avec vos observations.
 
 ```{r}
-# votre code ici: boxplot 1
+ggplot(df_data, aes(x = plan_type, y = customer_value, fill = plan_type)) +
+  geom_boxplot() +
+  labs(title = "Répartition de la valeur client par type de forfait",
+       x = "Type de forfait", y = "Valeur Client") +
+  theme_minimal()
 ```
 
-vos commentaires: ...
+vos commentaires:
+
+Ce graphique permet de comparer la rentabilité entre les forfaits "PayAsYouGo" et les autres.
 
 ```{r}
-# votre code ici: boxplot 2
+ggplot(df_data, aes(x = lost_customer, y = subscription_in_months, fill = lost_customer)) +
+  geom_boxplot() +
+  labs(title = "Ancienneté des clients : Perdus vs Fidèles",
+       x = "Client Perdu (True/False)", y = "Mois d'abonnement") +
+  theme_minimal()
 ```
 
-vos commentaires: ...
+vos commentaires:
+
+On peut vérifier si les clients qui partents ont des clients récents ou des clients fidèles de longue date.
 
 ```{r}
-# votre code ici: boxplot 3
+ggplot(df_data, aes(x = age_group, y = nb_sms, fill = age_group)) +
+  geom_boxplot() +
+  labs(title = "Consommation de SMS par tranche d'âge",
+       x = "Groupe d'âge", y = "Nombre de SMS") +
+  theme_minimal()
 ```
 
-vos commentaires: ...
+vos commentaires:
+
+On s'attend à ce que le plus jeune groupe ait une médiane de SMS plus élevée que les groupes plus âgés.
 
 #### Construire un scatterplot
 
 Sélectionner 3 paires de variables numériques pour construire 3 scatterplots différents. Illustrer aussi comment les paramètres de couleur et de taille peuvent être utilisés. N'oubliez pas de commenter chaque graphique avec vos observations.
 
 ```{r}
-# votre code ici: scatterplot 1
+ggplot(df_data, aes(x = nb_calls, y = customer_value, color = plan_type)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "Relation entre nombre d'appels et valeur client",
+       x = "Nombre d'appels", y = "Valeur Client") +
+  theme_minimal()
 ```
 
-vos commentaires: ...
+vos commentaires:
+
+On observe une corrélation positive : plus un client passe d'appels, plus sa valeur générée est élevée.
 
 ```{r}
-# votre code ici: scatterplot 2
+ggplot(df_data, aes(x = nb_calls, y = nb_call_seconds, size = nb_lost_calls)) +
+  geom_point(alpha = 0.3, color = "darkblue") +
+  labs(title = "Volume d'appels vs Durée totale",
+       x = "Nombre d'appels", y = "Secondes cumulées", size = "Appels perdus") +
+  theme_minimal()
 ```
 
-vos commentaires: ...
+vos commentaires:
+
+La taille des points indique les appels perdus. On peut voir si les gros utilisateurs subissent plus de problèmes techniques.
 
 ```{r}
-# votre code ici: scatterplot 3
+ggplot(df_data, aes(x = nb_sms, y = nb_calls, color = lost_customer)) +
+  geom_point(alpha = 0.6) +
+  scale_color_manual(values = c("green", "red")) +
+  labs(title = "Profil d'utilisation : SMS vs Appels",
+       x = "Nombre de SMS", y = "Nombre d'appels") +
+  theme_minimal()
 ```
 
-vos commentaires: ...
+vos commentaires:
+
+Ce graphique permet de voir si les clients qui partent en crouge ont un profil d'utilisation spécifique
 
 #### Construire une matrice de corrélation et sa réprésentation graphique.
 
@@ -111,7 +173,28 @@ Sélectionner les paramètres de 'ggcorplot' pour ne representer les corrélatio
 N'oubliez pas de commenter chaque graphique avec vos observations.
 
 ```{r}
-# votre code ici
+# 1. Sélection des colonnes numériques uniquement
+df_num <- df_data %>% select(where(is.numeric))
+
+# 2. Calcul de la matrice de corrélation
+corr_matrix <- cor(df_num, use = "complete.obs")
+
+# 3. Visualisation avec ggcorrplot
+ggcorrplot(corr_matrix, 
+           hc.order = TRUE, 
+           type = "lower",        # Uniquement la partie basse
+           lab = TRUE,           # Afficher les coefficients
+           lab_size = 3, 
+           method = "circle", 
+           colors = c("#6D9EC1", "white", "#E46726"), 
+           title = "Matrice de corrélation des indicateurs Télécom", 
+           outline.color = "white")
 ```
 
-vos commentaires: ...
+vos commentaires:
+
+Les coefficients proches en orange foncé indiquent une forte corrélation positive .
+
+Les valeurs proches de 0 indiquent une absence de lien linéaire.
+
+C'est un outil puissant pour identifier les variables prédictives pour la suite de l'analyse.
